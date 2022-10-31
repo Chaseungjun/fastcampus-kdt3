@@ -1,6 +1,5 @@
 package org.example;
 
-import net.sf.cglib.core.Local;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Locale;
 
@@ -19,15 +17,6 @@ public class IndexController {
     /**
      * Simply selects the home view to render by returning its name.
      */
-    @RequestMapping(value = "/", method = RequestMethod.GET)  //localhost:8080/ get 요청시 index 메서드 호출
-    public String index(Local local, Model model, HttpServletRequest request){
-        System.out.println("IndexController");
-        LocalDateTime localDateTime = LocalDateTime.now();
-        model.addAttribute("now", localDateTime);
-        // localhost:8080 --> forward --> index.jsp
-        return "index";
-    }
-    /*
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String home(Locale locale, Model model, HttpServletRequest request) {
 
@@ -51,8 +40,6 @@ public class IndexController {
 
 
         // prefix: /WEB-INF/views/ , suffix: jsp
-       // return "index"; // /WEB-INF/views/index.jsp
-
+        return "index"; // /WEB-INF/views/index.jsp
     }
-
-//}
+}
