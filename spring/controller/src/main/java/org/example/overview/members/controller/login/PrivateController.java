@@ -7,6 +7,7 @@ import org.example.overview.members.service.MemberService;
 import org.example.overview.sessions.SessionMgr;
 import org.example.overview.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/members")
@@ -55,6 +57,7 @@ public class PrivateController { // 개인 설정 페이지 컨트롤러
     }
 
 
+    /* uPw와 uNewPw가 같으면 패스워드 업데이트 불가능 기능 추가 (22.11.03) */
     @PostMapping({"/private/rev", "/private/rev/{uId}"})
     public String updateUserPassword(@PathVariable(required = false) String uId,
                                      @RequestParam(required = false) String uPw,
@@ -63,8 +66,6 @@ public class PrivateController { // 개인 설정 페이지 컨트롤러
         String view = updatePage(model, session);
         Status respStatus = Status.FAIL;
 
-
-        System.out.println(uId);
 
         if (!session.getAttribute("SESSION_ID").equals(uId)) {
             session.setAttribute("update", respStatus);
@@ -79,6 +80,40 @@ public class PrivateController { // 개인 설정 페이지 컨트롤러
         session.setAttribute("update", respStatus);
         return view;
     }
+
+
+    @PostMapping(value = "/private/checkPwd",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Status checkPassword(@RequestBody Map<String, String> map) { // uId, uPw
+        if (map.get("uId") == null || map.get("uPw") == null) return Status.NULL;
+        if (map.get("uId").equals("") || map.get("uPw").equals("")) return Status.NULL;
+
+        MemberDTO memberDTO = new MemberDTO();
+        memberDTO.setuId(map.get("uId"));
+        memberDTO.setuPw(Password.of(map.get("uPw")));
+
+        Status status = memberService.checkPassword(memberDTO.getuId(), memberDTO.getuPw()) ? Status.SUCCESS : Status.FAIL;
+        return status;
+    }
+
+    @PostMapping(value = "/private/checkNewPwd",
+            consumes = MediaType.APPLICATION_JSON_VALUE, // "{"uId": "", "uNewPw": ""}"
+            produces = MediaType.APPLICATION_JSON_VALUE) // "SUCCESS", "FAIL"
+    @ResponseBody
+    public Status checkNewPassword(@RequestBody Map<String, String> map) { // uId, uNewPw
+        if (map.get("uId") == null || map.get("uNewPw") == null) return Status.NULL;
+        if (map.get("uId").equals("") || map.get("uNewPw").equals("")) return Status.NULL;
+
+        MemberDTO memberDTO = new MemberDTO();
+        memberDTO.setuId(map.get("uId"));
+        memberDTO.setuNewPw(Password.of(map.get("uNewPw")));
+
+        Status status = memberService.checkNewPassword(memberDTO.getuId(), memberDTO.getuNewPw()) ? Status.SUCCESS : Status.FAIL;
+        return status;
+    }
+
 
     @GetMapping("/private/rm")
     public String withdrawPage(Model model, HttpSession session) {
