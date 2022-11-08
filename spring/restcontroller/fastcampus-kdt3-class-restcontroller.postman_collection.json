@@ -13,13 +13,13 @@
 					"name": "PrivateRestController",
 					"item": [
 						{
-							"name": "updateUserInformation",
+							"name": "updateUserEmail",
 							"request": {
 								"method": "PUT",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\"uPw\":\"e12345\", \"uNewPw\":\"e123456\", \"uNewEmail\": \"asdas@gmail\"}",
+									"raw": "{\"uNewEmail\": \"aaaaa@gmail\"}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -41,10 +41,48 @@
 							"response": []
 						},
 						{
+							"name": "updateUserPassword",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"url": {
+									"raw": "{{API_URL}}/members/private/w?uPw=w1234&uNewPw=w12345",
+									"host": [
+										"{{API_URL}}"
+									],
+									"path": [
+										"members",
+										"private",
+										"w"
+									],
+									"query": [
+										{
+											"key": "uPw",
+											"value": "w1234"
+										},
+										{
+											"key": "uNewPw",
+											"value": "w12345"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "checkPassword",
 							"request": {
 								"method": "POST",
 								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"uId\":\"c\", \"uPw\":\"c1234\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
 									"raw": "{{API_URL}}/members/private/checkPwd",
 									"host": [
@@ -97,19 +135,19 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{API_URL}}/members/private/a?uPw=a1234&agree=yes",
+									"raw": "{{API_URL}}/members/private/c?uPw=c1234&agree=yes",
 									"host": [
 										"{{API_URL}}"
 									],
 									"path": [
 										"members",
 										"private",
-										"a"
+										"c"
 									],
 									"query": [
 										{
 											"key": "uPw",
-											"value": "a1234"
+											"value": "c1234"
 										},
 										{
 											"key": "agree",
@@ -131,13 +169,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{API_URL}}/members/a",
+									"raw": "{{API_URL}}/members/d",
 									"host": [
 										"{{API_URL}}"
 									],
 									"path": [
 										"members",
-										"a"
+										"d"
 									]
 								}
 							},
@@ -146,10 +184,10 @@
 						{
 							"name": "findByUserIdOrEmail",
 							"request": {
-								"method": "POST",
+								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{API_URL}}/members?q=a",
+									"raw": "{{API_URL}}/members?q=com",
 									"host": [
 										"{{API_URL}}"
 									],
@@ -159,7 +197,7 @@
 									"query": [
 										{
 											"key": "q",
-											"value": "a"
+											"value": "com"
 										}
 									]
 								}
@@ -174,7 +212,7 @@
 						{
 							"name": "doSurvey",
 							"request": {
-								"method": "PUT",
+								"method": "POST",
 								"header": [],
 								"url": {
 									"raw": "{{API_URL}}/members/survey/a?season=spring&fruit=melon",
@@ -206,7 +244,15 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": ""
+									"raw": "{{API_URL}}/members/survey/a",
+									"host": [
+										"{{API_URL}}"
+									],
+									"path": [
+										"members",
+										"survey",
+										"a"
+									]
 								}
 							},
 							"response": []
@@ -225,7 +271,26 @@
 							"name": "doLogin",
 							"request": {
 								"method": "POST",
-								"header": []
+								"header": [],
+								"url": {
+									"raw": "{{API_URL}}/login?uId=z&uPw=z1234",
+									"host": [
+										"{{API_URL}}"
+									],
+									"path": [
+										"login"
+									],
+									"query": [
+										{
+											"key": "uId",
+											"value": "z"
+										},
+										{
+											"key": "uPw",
+											"value": "z1234"
+										}
+									]
+								}
 							},
 							"response": []
 						}
@@ -240,7 +305,27 @@
 								"method": "POST",
 								"header": [],
 								"url": {
-									"raw": ""
+									"raw": "{{API_URL}}/signup?uId=fooasas-_-&uEmail=foo@gmail.com&uPw=foo1234",
+									"host": [
+										"{{API_URL}}"
+									],
+									"path": [
+										"signup"
+									],
+									"query": [
+										{
+											"key": "uId",
+											"value": "fooasas-_-"
+										},
+										{
+											"key": "uEmail",
+											"value": "foo@gmail.com"
+										},
+										{
+											"key": "uPw",
+											"value": "foo1234"
+										}
+									]
 								}
 							},
 							"response": []
@@ -252,15 +337,20 @@
 								"header": [],
 								"body": {
 									"mode": "urlencoded",
-									"urlencoded": []
+									"urlencoded": [
+										{
+											"key": "uId",
+											"value": "asd\n",
+											"type": "text"
+										}
+									]
 								},
 								"url": {
-									"raw": "{{API_URL}}/members/signup/checkId",
+									"raw": "{{API_URL}}/signup/checkId",
 									"host": [
 										"{{API_URL}}"
 									],
 									"path": [
-										"members",
 										"signup",
 										"checkId"
 									]
