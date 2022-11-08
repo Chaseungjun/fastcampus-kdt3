@@ -18,6 +18,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,6 +30,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {WebAppConfig.class, DispatcherServletConfig.class})
 @WebAppConfiguration // WebApplicationContext 생성할 수 있도록 하는 어노테이션
 public class SearchRestControllerTest {
+
+    /*
+     * transactionManager 를 빈으로 등록 (WebAppConfig)
+     * - @Transactional 통해 transactionManager 빈을 실행시켜 @Test 환경에서 RollBack 시킴
+     * - 스프링에서 자동적으로 이러한 Transaction 에 대해 정의되어있는 함수를
+     * - TransactionTestExecutionListener 에서 탐색 후 탐색이 되면 이를 Rollback 시킴
+     *
+     * @Before (JUnit 4), @BeforeEach (JUnit 5)
+     * @After (JUnit 4),  @AfterEach (JUnit 5)
+     * - 메소드 단위의 라이프 사이클을 가지는 어노테이션
+     * - @Test 와 동일한 Transactional 을 공유함
+     *
+     *
+     * @BeforeClass (JUnit 4), @BeforeAll (JUnit 5)
+     * @AfterClass (JUnit 4),  @AfterAll (JUnit 5)
+     * - 클래스 단위의 라이프 사이클을 가지는 어노테이션
+     * - @Test 와 동일한 Transactional 을 공유하지 않음
+     * */
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -47,6 +66,7 @@ public class SearchRestControllerTest {
     }
 
     @Before
+    @Transactional
     public void 테스트_위한_객체_생성() {
         Member member = Member.builder()
                 .uId("test")
@@ -57,12 +77,14 @@ public class SearchRestControllerTest {
     }
 
     @After
+    @Transactional
     public void 테스트_위한_객체_소멸() {
         memberDAO.delete("test");
     }
 
-    @DisplayName("사용자 한명 검색 테스트")
     @Test
+    @Transactional
+    @DisplayName("사용자 한명 검색 테스트")
     public void 사용자_한명_검색_테스트() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/members/test"))
                 .andExpect(status().isOk())
@@ -72,9 +94,9 @@ public class SearchRestControllerTest {
                 .andDo(print());
     }
 
-
-    @DisplayName("사용자 키워드 검색 테스트")
     @Test
+    @Transactional
+    @DisplayName("사용자 키워드 검색 테스트")
     public void 사용자_키워드_검색_테스트() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/members")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
