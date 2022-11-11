@@ -1,71 +1,102 @@
 package org.example.overview.config;
 
-import org.example.overview.interceptor.*;
+import org.example.overview.interceptor.AuthInterceptor;
+import org.example.overview.interceptor.LocaleInterceptor;
+import org.example.overview.interceptor.LoginInterceptor;
+import org.example.overview.interceptor.NoneAuthInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.xml.MarshallingHttpMessageConverter;
 import org.springframework.oxm.xstream.XStreamMarshaller;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.web.filter.HiddenHttpMethodFilter;
-import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import java.util.List;
+import java.util.Locale;
 
 @Configuration
-@EnableWebMvc // <mvc:annotation-driven /> 와 동일 (HandlerMapping, HandlerAdatper, Interceptor등 스프링에서 필요한 빈들을 자동 설정해주는 어노테이션)
+@EnableTransactionManagement(proxyTargetClass = true)
+@EnableWebMvc
 @ComponentScan(basePackages = "org.example.overview",
         useDefaultFilters = false,
         includeFilters = {
                 @ComponentScan.Filter(type = FilterType.ANNOTATION, value = {Controller.class})}
 )
 public class DispatcherServletConfig implements WebMvcConfigurer {
-    // dispatcher-servlet.xml
 
 
+    LocaleInterceptor localeInterceptor;
+
+
+    AuthInterceptor authInterceptor;
+
+    NoneAuthInterceptor noneAuthInterceptor;
+
+    LoginInterceptor loginInterceptor;
+
+
+    @Autowired
+    public DispatcherServletConfig(LocaleInterceptor localeInterceptor, AuthInterceptor authInterceptor, NoneAuthInterceptor noneAuthInterceptor, LoginInterceptor loginInterceptor) {
+        this.localeInterceptor = localeInterceptor;
+        this.authInterceptor = authInterceptor;
+        this.noneAuthInterceptor = noneAuthInterceptor;
+        this.loginInterceptor = loginInterceptor;
+    }
+
+    /* 인터셉터 등록 */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(loginInterceptor()).addPathPatterns("/login");
-        registry.addInterceptor(authInterceptor()).addPathPatterns("/members/**");
-        registry.addInterceptor(nonAuthInterceptor()).addPathPatterns(List.of("/login", "/signup"));
-//        registry.addInterceptor(localeInterceptor());
+        registry.addInterceptor(localeInterceptor)
+                .order(1)
+                .addPathPatterns("/**")
+                .excludePathPatterns("/resources/**");
+
+        registry.addInterceptor(authInterceptor)
+                .order(2)
+                .addPathPatterns("/members/**");
+
+        registry.addInterceptor(noneAuthInterceptor)
+                .order(3)
+                .addPathPatterns("/login/**", "/signup/**");
+
+
+        registry.addInterceptor(loginInterceptor)
+                .order(4)
+                .addPathPatterns("/login/**");
+
+
+        WebMvcConfigurer.super.addInterceptors(registry);
     }
 
-    @Bean
-    public LoginInterceptor loginInterceptor() {
-        return new LoginInterceptor();
-    }
-
-    @Bean
-    public AuthInterceptor authInterceptor() {
-        return new AuthInterceptor();
-    }
-
-    @Bean
-    public NonAuthInterceptor nonAuthInterceptor() {
-        return new NonAuthInterceptor();
-    }
 
 
-    @Bean
-    public LocaleInterceptor localeInterceptor() {
-        return new LocaleInterceptor();
-    }
-
-    // @Valid 사용하기 위한 빈 설정
+    /** @Valid 사용을 위함 */
     @Bean
     public Validator localValidatorFactoryBean() {
         return new LocalValidatorFactoryBean();
     }
 
 
+    /** Message Converter 등록 */
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(createXmlHttpMessageConverter());
         converters.add(new MappingJackson2HttpMessageConverter());
+        WebMvcConfigurer.super.extendMessageConverters(converters);
     }
 
     private HttpMessageConverter<Object> createXmlHttpMessageConverter() {
@@ -78,6 +109,8 @@ public class DispatcherServletConfig implements WebMvcConfigurer {
         return xmlConverter;
     }
 
+
+    /** View Resolver */
     @Bean
     public InternalResourceViewResolver internalResourceViewResolver() {
         InternalResourceViewResolver internalResourceViewResolver = new InternalResourceViewResolver();
@@ -86,10 +119,13 @@ public class DispatcherServletConfig implements WebMvcConfigurer {
         return internalResourceViewResolver;
     }
 
+
+    /** Resource Handler */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/resources/**").addResourceLocations("/resources/");
     }
+
 
 
 }

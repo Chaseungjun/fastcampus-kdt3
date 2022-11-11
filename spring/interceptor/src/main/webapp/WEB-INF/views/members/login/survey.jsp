@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <title>SPRING</title>
-    <link href="/resources/css/style.css" rel="stylesheet" type="text/css">
+    <link href="/resources/css/style.css" rel="stylesheet" type="text/css" onload="this.media='all'">
 </head>
 <body>
 <header>
@@ -24,7 +24,7 @@
     <div>Hello! ${uId}</div>
     <div>Please complete the survey below 👇🏻</div>
     <div>
-        <form method="post" action="/members/survey/${uId}">
+        <form method="post" action="/members/survey/res/${uId}">
             <fieldset>
                 <legend>1. Favorite Season ?</legend>
 

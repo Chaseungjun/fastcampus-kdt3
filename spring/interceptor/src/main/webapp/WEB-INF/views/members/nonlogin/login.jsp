@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>SPRING</title>
-    <link href="/resources/css/style.css" rel="stylesheet" type="text/css">
+    <link href="/resources/css/style.css" rel="stylesheet" type="text/css" onload="this.media='all'">
 </head>
 <body>
 <header>
